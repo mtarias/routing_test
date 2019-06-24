@@ -58,10 +58,9 @@ if __name__ == "__main__":
                 matrix_costs[package_name] = []
                 matrix_costs[package_name].append(cost)
 
-    # Sort packages
+    # Sort packages by weight (desc)
     packages = sorted(packages, key=lambda x: x.weight, reverse=True)
 
-    print([package.weight for package in packages])
     # Check data
     #for vehicle_key in list(vehicles.keys()):
     #    print('Name: ', str(vehicle_key) + ', Capacity: '+ str(vehicles[vehicle_key].capacity))
@@ -78,7 +77,7 @@ if __name__ == "__main__":
         package_costs = matrix_costs[package_name]
 
         # Sort costs
-        sorted_costs = sorted(package_costs, key=lambda x: (x.cost, -(x.vehicle.capacity-x.vehicle.occupied_space)))
+        sorted_costs = sorted(package_costs, key=lambda x: (x.cost, -(x.vehicle.capacity-x.vehicle.occupied_space)/x.vehicle.capacity))
         i = len(package_costs)
         a = 0
         print([(sorted_cost.vehicle.name, sorted_cost.cost, (sorted_cost.vehicle.capacity-sorted_cost.vehicle.occupied_space)) for sorted_cost in sorted_costs])
