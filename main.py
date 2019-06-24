@@ -4,8 +4,9 @@ import numpy as np
 
 from models import vehicle as vehicle_model
 from models import package as package_model
+from models import cost as cost_model
 
-vehicles = []
+vehicles = {}
 packages = []
 matrix_costs = {}
 incompatibles = {}
@@ -19,8 +20,9 @@ if __name__ == "__main__":
     with open('data/'+arg1+'/vehicles.txt','r') as f:
         data = csv.reader(f)
         for row in data:
-            vehicle = vehicle_model.Vehicle(row[0], int(row[1]))
-            vehicles.append(vehicle)
+            vehicle_name = row[0]
+            vehicle = vehicle_model.Vehicle(vehicle_name, int(row[1]))
+            vehicles[vehicle_name] = vehicle
 
     # Read incompatible
     with open('data/'+arg1+'/incompatible.txt','r') as f:
@@ -41,22 +43,27 @@ if __name__ == "__main__":
     with open('data/'+arg1+'/costs.txt','r') as f:
         data = csv.reader(f)
         for row in data:
-            package = row[0]
+            package_name = row[0]
+            vehicle_name = row[1]
             cost = row[2]
 
-            if package in matrix_costs:
-                matrix_costs[package].append(int(cost))
-            else:
-                matrix_costs[package] = []
-                matrix_costs[package].append(int(cost))
+            package = next((package for package in packages if package.name == package_name), None)
+            vehicle = vehicles[vehicle_name]
 
-    # Sort vehicles
+            cost = cost_model.Cost(package, vehicle, int(cost))
+
+            if package_name in matrix_costs:
+                matrix_costs[package_name].append(cost)
+            else:
+                matrix_costs[package_name] = []
+                matrix_costs[package_name].append(cost)
+
+    # Sort packages by weight (desc)
     packages = sorted(packages, key=lambda x: x.weight, reverse=True)
 
-    print([package.weight for package in packages])
     # Check data
-    #for vehicle in vehicles:
-    #    print('Name: ', vehicle.name + ', Capacity: '+ str(vehicle.capacity))
+    #for vehicle_key in list(vehicles.keys()):
+    #    print('Name: ', str(vehicle_key) + ', Capacity: '+ str(vehicles[vehicle_key].capacity))
 
     #for package in packages:
     #    print('Name: ', package.name + ', Weight: '+ str(package.weight))
@@ -70,34 +77,33 @@ if __name__ == "__main__":
         package_costs = matrix_costs[package_name]
 
         # Sort costs
-        sorted_costs = sorted(package_costs)
-        sorted_indexes_costs = list(np.argsort(package_costs))
+        sorted_costs = sorted(package_costs, key=lambda x: (x.cost, -(x.vehicle.capacity-x.vehicle.occupied_space)/x.vehicle.capacity))
         i = len(package_costs)
         a = 0
-        print(sorted_costs)
+        print([(sorted_cost.vehicle.name, sorted_cost.cost, (sorted_cost.vehicle.capacity-sorted_cost.vehicle.occupied_space)) for sorted_cost in sorted_costs])
+        #print([(sorted_cost.cost, sorted_cost.vehicle.occupied_space) for sorted_cost in sorted_costs])
 
         while i > 0:
-            # Get max cost of costs hash for package
-            max_cost = sorted_costs[a]
-            index_max_cost = sorted_indexes_costs[a]
+            # Get min cost of costs hash for package
+            min_cost = sorted_costs[a].cost
+            vehicle_name = sorted_costs[a].vehicle.name
 
             # Get vehicle capacity
-            vehicle_name = 'v' + str(index_max_cost+1)
-            vehicle = next((vehicle for vehicle in vehicles if vehicle.name == vehicle_name), None)
+            vehicle = vehicles[vehicle_name]
             free_space = vehicle.capacity - vehicle.occupied_space
 
             # Check vehicle capacity
             # if is lower, then add to solution and change vehicle capacity
             if package.weight <= free_space and package.incompatibles not in vehicle.packages:
                 # Add to solution
-                final_solution.append('Package: '+ package.name + ', Vehicle: '+ vehicle_name + ', Cost: '+str(max_cost))
+                final_solution.append('Package: '+ package.name + ', Vehicle: '+ vehicle_name + ', Cost: '+str(min_cost))
                 vehicle.packages.append(package.name)
                 vehicle.occupied_space += package.weight
-                solution_cost += max_cost
+                solution_cost += min_cost
                 i = 0
+                print('EL PAQUETE '+str(package.name)+' SE ASIGNO A '+str(vehicle.name)+', COSTO: '+str(min_cost)+' , ESPACIO LIBRE: '+str(vehicle.capacity-vehicle.occupied_space))
             else:
-                print('PACKAGES: '+str(sorted_costs))
-                print('EL PAQUETE '+str(package.name)+' NO PUEDE SER ASIGNADO A '+str(vehicle.name)+', COSTO: ')
+                print('EL PAQUETE '+str(package.name)+' NO PUEDE SER ASIGNADO A '+str(vehicle.name)+', CARGA: '+str(package.weight)+' , ESPACIO LIBRE: '+str(vehicle.capacity-vehicle.occupied_space))
                 i -= 1
                 a += 1
 
@@ -107,5 +113,5 @@ if __name__ == "__main__":
     for solution in final_solution:
         print(solution)
 
-    for vehicle in vehicles:
-        print('Vehicle '+vehicle.name+': Occupied: '+str(vehicle.occupied_space)+', Free: '+str(vehicle.capacity - vehicle.occupied_space))
+    for vehicle_key in list(vehicles.keys()):
+        print('Vehicle '+vehicle_key+': Occupied: '+str(vehicles[vehicle_key].occupied_space)+', Free: '+str(vehicles[vehicle_key].capacity - vehicles[vehicle_key].occupied_space))
