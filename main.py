@@ -78,15 +78,15 @@ if __name__ == "__main__":
         package_costs = matrix_costs[package_name]
 
         # Sort costs
-        sorted_costs = sorted(package_costs, key=lambda x: (x.cost))
+        sorted_costs = sorted(package_costs, key=lambda x: (x.cost, -(x.vehicle.capacity-x.vehicle.occupied_space)))
         i = len(package_costs)
         a = 0
-        #print([sorted_cost.cost for sorted_cost in sorted_costs])
-        #print([sorted_cost.vehicle.capacity for sorted_cost in sorted_costs])
+        print([(sorted_cost.vehicle.name, sorted_cost.cost, (sorted_cost.vehicle.capacity-sorted_cost.vehicle.occupied_space)) for sorted_cost in sorted_costs])
+        #print([(sorted_cost.cost, sorted_cost.vehicle.occupied_space) for sorted_cost in sorted_costs])
 
         while i > 0:
-            # Get max cost of costs hash for package
-            max_cost = sorted_costs[a].cost
+            # Get min cost of costs hash for package
+            min_cost = sorted_costs[a].cost
             vehicle_name = sorted_costs[a].vehicle.name
 
             # Get vehicle capacity
@@ -97,12 +97,12 @@ if __name__ == "__main__":
             # if is lower, then add to solution and change vehicle capacity
             if package.weight <= free_space and package.incompatibles not in vehicle.packages:
                 # Add to solution
-                final_solution.append('Package: '+ package.name + ', Vehicle: '+ vehicle_name + ', Cost: '+str(max_cost))
+                final_solution.append('Package: '+ package.name + ', Vehicle: '+ vehicle_name + ', Cost: '+str(min_cost))
                 vehicle.packages.append(package.name)
                 vehicle.occupied_space += package.weight
-                solution_cost += max_cost
+                solution_cost += min_cost
                 i = 0
-                print('EL PAQUETE '+str(package.name)+' SE ASIGNO A '+str(vehicle.name)+', COSTO: '+str(max_cost)+' , ESPACIO LIBRE: '+str(vehicle.capacity-vehicle.occupied_space))
+                print('EL PAQUETE '+str(package.name)+' SE ASIGNO A '+str(vehicle.name)+', COSTO: '+str(min_cost)+' , ESPACIO LIBRE: '+str(vehicle.capacity-vehicle.occupied_space))
             else:
                 print('EL PAQUETE '+str(package.name)+' NO PUEDE SER ASIGNADO A '+str(vehicle.name)+', CARGA: '+str(package.weight)+' , ESPACIO LIBRE: '+str(vehicle.capacity-vehicle.occupied_space))
                 i -= 1
