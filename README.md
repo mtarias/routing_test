@@ -24,11 +24,17 @@ La idea general utilizada es la siguiente: "Primero se asignan los despachos má
 El algoritmo recibe como entrada un arreglo de despachos, la lista de vehiculos y la matriz de costos. Realiza lo siguiente:
 1. Ordena los paquetes por peso, de forma descendente (los más pesados primero)
 2. Por cada paquete del orden anterior:
+    
     a. Se buscan sus costos y se ordenan de menor a mayor, en caso de empate, se busca que el vehiculo mencionado tenga una mayor capacidad disponible
+    
     b. Por cada costo anterior:
+    
     b.i. Se toma el primer costo (el menor)
+    
     b.ii. Se busca el auto correspondiente y se compara el peso del despacho con la capacidad del auto
+    
     b.ii.i. Si tiene capacidad, se asigna el despacho al vehículo correspondiente y se resta la capacidad actual del mismo
+    
     b.ii.ii. Si no hay capacidad (o hay un choque de despachos incompatibles) se prueba con el siguiente peso disponible.
 3. Se itera hasta llenar todos los automóviles o hasta no quedar despachos por asignar.
 
