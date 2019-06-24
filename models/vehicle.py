@@ -4,4 +4,4 @@ class Vehicle:
     def __init__(self, name, capacity):
         self.name = name
         self.capacity = capacity
-        self.packages = []
+        self.packages = [] # Paquetes asignados al vehículo
