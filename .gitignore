@@ -5,3 +5,7 @@ services/__pycache__/*
 
 # Ignore results
 results/*.txt
+
+# Ignore enunciado.pdf and instancias_de_prueba.xlsx
+enunciado.pdf
+instancia_de_prueba.xlsx
